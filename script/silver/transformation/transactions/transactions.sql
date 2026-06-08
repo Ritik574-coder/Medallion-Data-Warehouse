@@ -285,3 +285,6 @@ FROM clean_transaction ;
 
 
 SELECT TOP 10 * FROM bronze.sales_transactions ;
+
+
+SELECT * FROM INFORMATION_SCHEMA.SCHEMATA ; 

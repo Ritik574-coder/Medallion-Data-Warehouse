@@ -1,8 +1,8 @@
 /*=============================================================================================
---====CREATING DDL FOR BRONZE LAYER
+--====CREATING DDL FOR SILVER LAYER
 ===============================================================================================
 purpose : 
-	these script will create tables for bronze layer ,
+	these script will create tables for silver table in silver schema of TestDB database .,
 	if table is already created if will drop table and recreate .
 	
 	the script will create these following table .
@@ -25,7 +25,7 @@ Author : Ritik__
 Created on : 2026-06-08
 Version : 1.0
 project : DataWarehouse | TestDB
-schema : Bronze
+schema : Silver
 
 Environment :
 	Development / Testing
@@ -47,59 +47,56 @@ USE TestDB;
 GO
 
 /*=============================================================
-source : API | Table  : customers |schema : bronze
+source : API | Table  : customers |schema : silver
 =============================================================*/
 
-IF OBJECT_ID('bronze.customers', 'U') IS NOT NULL 
+IF OBJECT_ID('silver.customers', 'U') IS NOT NULL 
 BEGIN 
-    PRINT '>> dropping table bronze.customers..';
-    DROP TABLE bronze.customers ;
+    PRINT '>> dropping table silver.customers..';
+    DROP TABLE silver.customers ;
 END ;
 GO
 
-PRINT '>> creating table bronze.customers...';
-CREATE TABLE bronze.customers
+PRINT '>> creating table silver.customers...';
+CREATE TABLE silver.customers
 (
-    customer_id             INT          NULL,
-    title                   VARCHAR(10)  NULL,
-    first_name              VARCHAR(50)  NULL,
-    last_name               VARCHAR(50)  NULL,
-    full_name               VARCHAR(120) NULL,
-    gender                  VARCHAR(50)  NULL,
-    date_of_birth           VARCHAR(50)  NULL,
-    age                     INT          NULL,
-    email                   VARCHAR(200) NULL,
-    phone                   VARCHAR(30)  NULL,
-    address                 VARCHAR(200) NULL,
-    city                    VARCHAR(50)  NULL,
-    state                   VARCHAR(50)  NULL,
-    state_abbr              VARCHAR(10)  NULL,
-    state_full              VARCHAR(50)  NULL,
-    zip_code                INT          NULL,
-    country                 VARCHAR(100) NULL,
-    region                  VARCHAR(50)  NULL,
-    customer_segment        VARCHAR(50)  NULL,
-    loyalty_points          INT          NULL,
-    is_active               VARCHAR(50)  NULL,
-    account_created_date    VARCHAR(50)  NULL,
-    preferred_channel       VARCHAR(50)  NULL,
-    annual_income_usd       INT          NULL,
-    company                 VARCHAR(100) NULL
+    customer_id             INT          ,
+    title                   VARCHAR(10)  ,
+    first_name              VARCHAR(50)  ,
+    last_name               VARCHAR(50)  ,
+    gender                  VARCHAR(50)  ,
+    date_of_birth           VARCHAR(50)  ,
+    email                   VARCHAR(200) ,
+    phone                   VARCHAR(30)  ,
+    address                 VARCHAR(200) ,
+    city                    VARCHAR(50)  ,
+    state_abbr              VARCHAR(10)  ,
+    state                   VARCHAR(50)  ,
+    zip_code                INT          ,
+    country                 VARCHAR(100) ,
+    region                  VARCHAR(50)  ,
+    customer_segment        VARCHAR(50)  ,
+    loyalty_points          INT          ,
+    is_active               VARCHAR(50)  ,
+    account_created_date    VARCHAR(50)  ,
+    preferred_channel       VARCHAR(50)  ,
+    annual_income_usd       INT          ,
+    company                 VARCHAR(100) 
 ) ;
 GO
 
 /*=============================================================
-source : API | Table  : employees |schema : bronze
+source : API | Table  : employees |schema : silver
 =============================================================*/
-IF OBJECT_ID('bronze.employees', 'U') IS NOT NULL
+IF OBJECT_ID('silver.employees', 'U') IS NOT NULL
 BEGIN 
-    PRINT '>> dropping table bronze.employees....';
-    DROP TABLE bronze.employees ;
+    PRINT '>> dropping table silver.employees....';
+    DROP TABLE silver.employees ;
 END ;
 GO
 
-PRINT '>> creating bronze.employees table... ' ;
-CREATE TABLE bronze.employees
+PRINT '>> creating silver.employees table... ' ;
+CREATE TABLE silver.employees
 (
     employee_id             INT           NULL,
     first_name              VARCHAR(50)   NULL,
@@ -123,17 +120,17 @@ CREATE TABLE bronze.employees
 GO
 
 /*=============================================================
-source : API | Table  : inventory_snapshots |schema : bronze
+source : API | Table  : inventory_snapshots |schema : silver
 =============================================================*/
-IF OBJECT_ID('bronze.inventory_snapshots', 'U') IS NOT NULL
+IF OBJECT_ID('silver.inventory_snapshots', 'U') IS NOT NULL
 BEGIN 
-    PRINT '>> dropping table bronze.inventory_snapshots...';
-    DROP TABLE bronze.inventory_snapshots ;
+    PRINT '>> dropping table silver.inventory_snapshots...';
+    DROP TABLE silver.inventory_snapshots ;
 END ;
 GO
 
-PRINT '>> creating bronze.inventory_snapshots table... ';
-CREATE TABLE bronze.inventory_snapshots
+PRINT '>> creating silver.inventory_snapshots table... ';
+CREATE TABLE silver.inventory_snapshots
 (
     snapshot_date           VARCHAR(50)   NULL,
     product_id              INT           NULL,
@@ -153,17 +150,17 @@ CREATE TABLE bronze.inventory_snapshots
 GO
 
 /*=============================================================
-source : API | Table  : products |schema : bronze
+source : API | Table  : products |schema : silver
 =============================================================*/
-IF OBJECT_ID('bronze.products', 'U') IS NOT NULL
+IF OBJECT_ID('silver.products', 'U') IS NOT NULL
 BEGIN
-    PRINT '>> dropping table bronze.products...';
-    DROP TABLE bronze.products ;
+    PRINT '>> dropping table silver.products...';
+    DROP TABLE silver.products ;
 END ;
 GO
 
-PRINT '>> creating bronze.products table... ';
-CREATE TABLE bronze.products
+PRINT '>> creating silver.products table... ';
+CREATE TABLE silver.products
 (
     product_id              INT           NULL,
     sku                     VARCHAR(100)  NULL,
@@ -190,17 +187,17 @@ CREATE TABLE bronze.products
 GO
 
 /*=============================================================
-source : API | Table  : returns |schema : bronze
+source : API | Table  : returns |schema : silver
 =============================================================*/
-IF OBJECT_ID('bronze.returns', 'U') IS NOT NULL
+IF OBJECT_ID('silver.returns', 'U') IS NOT NULL
 BEGIN 
-    PRINT '>> dropping table bronze.returns....' ;
-    DROP TABLE bronze.returns ;
+    PRINT '>> dropping table silver.returns....' ;
+    DROP TABLE silver.returns ;
 END ;
 GO
 
-PRINT 'creating table bronze.returns' ;
-CREATE TABLE bronze.returns
+PRINT 'creating table silver.returns' ;
+CREATE TABLE silver.returns
 (
     return_id               INT           NULL,
     original_txn_id         VARCHAR(50)   NULL,
@@ -223,17 +220,17 @@ CREATE TABLE bronze.returns
 GO
 
 /*=============================================================
-source : API | Table  : reviews |schema : bronze
+source : API | Table  : reviews |schema : silver
 =============================================================*/
-IF OBJECT_ID('bronze.reviews', 'U') IS NOT NULL
+IF OBJECT_ID('silver.reviews', 'U') IS NOT NULL
 BEGIN 
-    PRINT '>> dropping table bronze.reviews....' ;
-    DROP TABLE bronze.reviews ;
+    PRINT '>> dropping table silver.reviews....' ;
+    DROP TABLE silver.reviews ;
 END ;
 GO
 
-PRINT 'creating table bronze.reviews' ;
-CREATE TABLE bronze.reviews
+PRINT 'creating table silver.reviews' ;
+CREATE TABLE silver.reviews
 (
     review_id               INT           NULL,
     txn_id                  VARCHAR(100)  NULL,
@@ -252,17 +249,17 @@ CREATE TABLE bronze.reviews
 GO
 
 /*=============================================================
-source : API | Table  : sales_transactions |schema : bronze
+source : API | Table  : sales_transactions |schema : silver
 =============================================================*/
-IF OBJECT_ID('bronze.sales_transactions', 'U') IS NOT NULL
+IF OBJECT_ID('silver.sales_transactions', 'U') IS NOT NULL
 BEGIN
-    PRINT '>> dropping table bronze.sales_transactions...';
-    DROP TABLE bronze.sales_transactions;
+    PRINT '>> dropping table silver.sales_transactions...';
+    DROP TABLE silver.sales_transactions;
 END ;
 GO
 
-PRINT 'creating table bronze.sales_transactions' ;
-CREATE TABLE bronze.sales_transactions
+PRINT 'creating table silver.sales_transactions' ;
+CREATE TABLE silver.sales_transactions
 (
     transaction_id          VARCHAR(100)  NULL,
     order_id                INT           NULL,
@@ -329,18 +326,18 @@ CREATE TABLE bronze.sales_transactions
 GO
 
 /*=============================================================
-source : API | Table  : stores |schema : bronze
+source : API | Table  : stores |schema : silver
 =============================================================*/
-IF OBJECT_ID('bronze.stores', 'U') IS NOT NULL
+IF OBJECT_ID('silver.stores', 'U') IS NOT NULL
 BEGIN 
-    PRINT '>> dropping table bronze.stores' ;
-    DROP TABLE bronze.stores ;
+    PRINT '>> dropping table silver.stores' ;
+    DROP TABLE silver.stores ;
 END ;
 GO 
 
-PRINT '>> creating table bronze.stores....';
+PRINT '>> creating table silver.stores....';
 
-CREATE TABLE bronze.stores
+CREATE TABLE silver.stores
 (
     store_id                INT           NULL,
     store_name              VARCHAR(100)  NULL,
