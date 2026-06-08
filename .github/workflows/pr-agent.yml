@@ -1,0 +1,31 @@
+name: PR Agent
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  pr_agent_job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: PR Agent Review
+        uses: the-pr-agent/pr-agent@main
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          CONFIG.MODEL: google/gemini-2.0-flash
+          CONFIG.GIT_PROVIDER: github
+          CONFIG.PUBLISH_OUTPUT: true
+
+          PR_REVIEWER.REQUIRE_TESTS_REVIEW: true
+          PR_REVIEWER.REQUIRE_SCORE_REVIEW: false
+          PR_CODE_SUGGESTIONS.NUM_CODE_SUGGESTIONS: 5
+
+          GOOGLE_AI_STUDIO.GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
