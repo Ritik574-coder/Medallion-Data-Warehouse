@@ -52,7 +52,7 @@ docker pull mcr.microsoft.com/mssql/server:2022-latest
 
 # creting and running container
 docker run -e "ACCEPT_EULA=Y" \
-    -e "MSSQL_SA_PASSWORD=Ritik@843313" \
+    -e "MSSQL_SA_PASSWORD=YourStrong!Passw0rd" \
     -p 1433:1433 \
     --name sqlserver \
     -v sql_data:/var/opt/mssql \
@@ -95,7 +95,7 @@ sudo apt install unixodbc-dev
 
 # This opens SQL CLI (sqlcmd)
 docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd 
--S localhost -U sa -P "Ritik@843313"
+-S localhost -U sa -P "YourStrong!Passw0rd"
 
 # moving data 
 docker cp /workspaces/dbt_learning_project/dataset sqlserver:/data/
