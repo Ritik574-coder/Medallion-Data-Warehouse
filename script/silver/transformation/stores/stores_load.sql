@@ -1,3 +1,26 @@
+INSERT INTO silver.stores
+(
+    store_id        ,
+    store_name      ,
+    store_type      ,
+    address         ,
+    city            ,
+    state           ,
+    state_full      ,
+    zip_code        ,
+    country         ,
+    region          ,
+    district        ,
+    phone           ,
+    manager_name    ,
+    opened_date     ,
+    sq_footage      ,
+    num_employees   ,
+    annual_rent_usd ,
+    is_active       ,
+    has_parking     ,
+    has_cafe          
+)
 SELECT
        store_id
       ,store_name
