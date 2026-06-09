@@ -1,4 +1,4 @@
-CREATE TABLE silver.reviews
+INSERT INTO  silver.reviews
 (
     review_id          ,
     txn_id             ,
@@ -37,7 +37,11 @@ FROM
         ,customer_name
         ,product_id
         ,product_name
-        ,rating
+        ,CASE
+            WHEN TRY_CONVERT(INT, rating) BETWEEN 1 AND 5
+            THEN TRY_CONVERT(INT, rating)
+            ELSE NULL
+        END AS rating
         ,rating_text
 
         ,CASE 

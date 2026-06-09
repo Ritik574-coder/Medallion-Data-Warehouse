@@ -99,27 +99,27 @@ GO
 PRINT '>> creating silver.employees table... ' ;
 CREATE TABLE silver.employees
 (
-    employee_id             INT PRIMARY KEY, 
-    first_name              VARCHAR(50)  ,
-    last_name               VARCHAR(50)  ,
-    email                   VARCHAR(200) ,
-    phone                   VARCHAR(30)  ,
-    job_title               VARCHAR(50)  ,
-    department              VARCHAR(50)  ,
-    store_id                INT          ,
-    store_name              VARCHAR(150) ,
-    store_city              VARCHAR(100) ,
-    hire_date               DATE         ,
-    years_employed          INT          ,
-    annual_salary_usd       INT          ,
-    commission_rate_pct     FLOAT        ,
-    is_active               VARCHAR(50)  ,
-    performance_rating      VARCHAR(50)  ,
-    manager_id              INT          ,
+    employee_id             INT PRIMARY KEY            , 
+    first_name              VARCHAR(50)                ,
+    last_name               VARCHAR(50)                ,
+    email                   VARCHAR(200)               ,
+    phone                   VARCHAR(30)                ,
+    job_title               VARCHAR(50)                ,
+    department              VARCHAR(50)                ,
+    store_id                INT                        ,
+    store_name              VARCHAR(150)               ,
+    store_city              VARCHAR(100)               ,
+    hire_date               DATE                       ,
+    years_employed          DECIMAL(4,2)               ,
+    annual_salary_usd       DECIMAL(18,2)              ,
+    commission_rate_pct     DECIMAL(4,2)               ,
+    is_active               VARCHAR(10)                ,
+    performance_rating      VARCHAR(50)                ,
+    manager_id              INT                        ,
     dwh_create_date         DATETIME2 DEFAULT GETDATE()
 );
 GO
-
+ 
 /*=============================================================
 source : API | Table  : inventory_snapshots |schema : silver
 =============================================================*/
@@ -133,23 +133,24 @@ GO
 PRINT '>> creating silver.inventory_snapshots table... ';
 CREATE TABLE silver.inventory_snapshots
 (
-    snapshot_date           VARCHAR(50)  ,
-    product_id              INT          ,
-    product_name            VARCHAR(150) ,
-    sku                     VARCHAR(100) ,
-    category                VARCHAR(100) ,
-    stock_on_hand           INT          ,
-    stock_reserved          INT          ,
-    stock_available         VARCHAR(50)  ,
-    reorder_level           INT          ,
-    unit_cost               VARCHAR(50)  ,
-    unit_price              VARCHAR(50)  ,
-    inventory_value         VARCHAR(50)  ,
-    warehouse_location      VARCHAR(20)  ,
-    store_id                INT          
+    snapshot_date           DATE                        ,
+    product_id              INT                         ,
+    product_name            VARCHAR(150)                ,
+    sku                     VARCHAR(100)                ,
+    category                VARCHAR(100)                ,
+    stock_on_hand           INT                         ,
+    stock_reserved          INT                         ,
+    stock_available         INT                         ,
+    reorder_level           INT                         ,
+    unit_cost               DECIMAL(10, 2)              ,
+    unit_price              DECIMAL(10, 2)              ,
+    inventory_value         DECIMAL(18, 2)              ,
+    warehouse_location      VARCHAR(20)                 ,
+    store_id                INT                         ,
+    dwh_create_date         DATETIME2 DEFAULT GETDATE()        
 );
 GO
-
+ 
 /*=============================================================
 source : API | Table  : products |schema : silver
 =============================================================*/
@@ -163,27 +164,28 @@ GO
 PRINT '>> creating silver.products table... ';
 CREATE TABLE silver.products
 (
-    product_id              INT          ,
-    sku                     VARCHAR(100) ,
-    product_name            VARCHAR(200) ,
-    brand                   VARCHAR(100) ,
-    category                VARCHAR(100) ,
-    sub_category            VARCHAR(100) ,
-    department              VARCHAR(100) ,
-    base_price_usd          VARCHAR(50)  ,
-    cost_price_usd          VARCHAR(50)  ,
-    gross_margin_pct        FLOAT        ,
-    weight_kg               FLOAT        ,
-    is_available            VARCHAR(50)  ,
-    stock_quantity          INT          ,
-    reorder_level           INT          ,
-    supplier_name           VARCHAR(150) ,
-    supplier_country        VARCHAR(100) ,
-    warranty_years          INT          ,
-    rating_avg              FLOAT        ,
-    review_count            INT          ,
-    launched_date           VARCHAR(50)  ,
-    product_url             VARCHAR(255)    
+    product_id              INT PRIMARY KEY            ,
+    sku                     VARCHAR(100)               ,
+    product_name            VARCHAR(200)               ,
+    brand                   VARCHAR(100)               ,
+    category                VARCHAR(100)               ,
+    sub_category            VARCHAR(100)               ,
+    department              VARCHAR(100)               ,
+    base_price_usd          DECIMAL(10, 2)             ,
+    cost_price_usd          DECIMAL(10, 2)             ,
+    gross_margin_pct        DECIMAL(5, 1)              ,
+    weight_kg               DECIMAL(5, 2)              ,
+    is_available            VARCHAR(20)                ,
+    stock_quantity          INT                        ,
+    reorder_level           INT                        ,
+    supplier_name           VARCHAR(150)               ,
+    supplier_country        VARCHAR(100)               ,
+    warranty_years          INT                        ,
+    rating_avg              DECIMAL(3, 1)              ,
+    review_count            INT                        ,
+    launched_date           DATE                       ,
+    product_url             VARCHAR(255)               ,
+    dwh_create_date         DATETIME2 DEFAULT GETDATE() 
 );
 GO
 
@@ -200,23 +202,24 @@ GO
 PRINT 'creating table silver.returns' ;
 CREATE TABLE silver.returns
 (  
-    return_id               INT          ,  
-    original_txn_id         VARCHAR(50)  ,  
-    original_order_id       INT          ,  
-    customer_id             INT          ,  
-    customer_name           VARCHAR(100) ,  
-    product_id              INT          ,  
-    product_name            VARCHAR(100) ,  
-    quantity_returned       INT          ,  
-    return_date             VARCHAR(50)  ,  
-    return_reason           VARCHAR(50)  ,  
-    refund_amount           VARCHAR(50)  ,  
-    refund_method           VARCHAR(50)  ,  
-    return_channel          VARCHAR(50)  ,  
-    restocked               VARCHAR(50)  ,  
-    return_status           VARCHAR(50)  ,  
-    handled_by_emp_id       INT          ,  
-    notes                   VARCHAR(100)     
+    return_id               INT PRIMARY KEY             ,  
+    original_txn_id         VARCHAR(50)                 ,  
+    original_order_id       INT                         ,  
+    customer_id             INT                         ,  
+    customer_name           VARCHAR(100)                ,  
+    product_id              INT                         ,  
+    product_name            VARCHAR(100)                ,  
+    quantity_returned       INT                         ,  
+    return_date             DATE                        ,  
+    return_reason           VARCHAR(50)                 ,  
+    refund_amount           DECIMAL(10,2)               ,  
+    refund_method           VARCHAR(50)                 ,  
+    return_channel          VARCHAR(50)                 ,  
+    restocked               VARCHAR(50)                 ,  
+    return_status           VARCHAR(50)                 ,  
+    handled_by_emp_id       INT                         ,  
+    notes                   VARCHAR(100)                ,   
+    dwh_create_date         DATETIME2 DEFAULT GETDATE()  
 );
 GO
 
@@ -233,19 +236,20 @@ GO
 PRINT 'creating table silver.reviews' ;
 CREATE TABLE silver.reviews
 (
-    review_id               INT          ,
-    txn_id                  VARCHAR(100) ,
-    customer_id             INT          ,
-    customer_name           VARCHAR(100) ,
-    product_id              INT          ,
-    product_name            VARCHAR(150) ,
-    rating                  INT          ,
-    rating_text             VARCHAR(50)  ,
-    review_date             VARCHAR(50)  ,
-    verified_purchase       VARCHAR(50)  ,
-    helpful_votes           INT          ,
-    review_channel          VARCHAR(50)  ,
-    review_title            VARCHAR(100)  
+    review_id               INT PRIMARY KEY             ,
+    txn_id                  VARCHAR(100)                ,
+    customer_id             INT                         ,
+    customer_name           VARCHAR(100)                ,
+    product_id              INT                         ,
+    product_name            VARCHAR(150)                ,
+    rating                  INT                         ,
+    rating_text             VARCHAR(50)                 ,
+    review_date             DATE                        ,
+    verified_purchase       VARCHAR(20)                 ,
+    helpful_votes           INT                         ,
+    review_channel          VARCHAR(50)                 ,
+    review_title            VARCHAR(100)                ,
+    dwh_create_date         DATETIME2 DEFAULT GETDATE()  
 );
 GO
 
@@ -340,25 +344,26 @@ PRINT '>> creating table silver.stores....';
 
 CREATE TABLE silver.stores
 (
-    store_id                INT          ,
-    store_name              VARCHAR(100) ,
-    store_type              VARCHAR(50)  ,
-    address                 VARCHAR(50)  ,
-    city                    VARCHAR(50)  ,
-    state                   VARCHAR(50)  ,
-    state_full              VARCHAR(50)  ,
-    zip_code                INT          ,
-    country                 VARCHAR(50)  ,
-    region                  VARCHAR(50)  ,
-    district                VARCHAR(50)  ,
-    phone                   VARCHAR(50)  ,
-    manager_name            VARCHAR(50)  ,
-    opened_date             VARCHAR(50)  ,
-    sq_footage              INT          ,
-    num_employees           INT          ,
-    annual_rent_usd         INT          ,
-    is_active               VARCHAR(50)  ,
-    has_parking             VARCHAR(50)  ,
-    has_cafe                VARCHAR(50)   
+    store_id                INT PRIMARY KEY         ,
+    store_name              VARCHAR(100)            ,
+    store_type              VARCHAR(50)             ,
+    address                 VARCHAR(50)             ,
+    city                    VARCHAR(50)             ,
+    state                   VARCHAR(50)             ,
+    state_full              VARCHAR(50)             ,
+    zip_code                INT                     ,
+    country                 VARCHAR(50)             ,
+    region                  VARCHAR(50)             ,
+    district                VARCHAR(50)             ,
+    phone                   VARCHAR(50)             ,
+    manager_name            VARCHAR(50)             ,
+    opened_date             DATE                    ,
+    sq_footage              INT                     ,
+    num_employees           INT                     ,
+    annual_rent_usd         INT                     ,
+    is_active               VARCHAR(10)             ,
+    has_parking             VARCHAR(10)             ,
+    has_cafe                VARCHAR(10)             ,
+    dwh_create_date         DATETIME2 DEFAULT GETDATE()  
 );
 GO

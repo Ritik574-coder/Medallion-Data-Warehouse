@@ -132,7 +132,7 @@ git add .
 git commit -m "Implement bronze layer ETL process"
 
 # commit with co-author
-git commit -m "Implement silver layer transformations and data standardization
+git commit -m "Refactor silver layer SQL scripts for improved data structure and integrity
 
 Co-authored-by: ritsky-project <ritsky598@gmail.com>"
 
