@@ -61,3 +61,95 @@ FROM deduplicated
 WHERE _row_flag = 1;
 
 
+-- transaction_id data overview 
+SELECT 
+    transaction_id 
+FROM bronze.sales_transactions ;
+
+-- transaction_id data profiling 
+SELECT 
+      transaction_id 
+FROM  bronze.sales_transactions 
+WHERE transaction_id  IS NULL 
+   OR transaction_id  NOT LIKE 'TXN%'
+   OR transaction_id != TRIM(transaction_id)
+   OR transaction_id != UPPER(transaction_id)
+   OR TRIM(transaction_id) = ''
+   OR LEN(TRIM(transaction_id)) < 13 ;
+
+-- Check for duplicates in transaction_id
+SELECT 
+    *
+FROM 
+(
+    SELECT 
+        transaction_id,
+        ROW_NUMBER() OVER(PARTITION BY transaction_id ORDER BY transaction_id) as flag 
+    FROM bronze.sales_transactions
+) t
+WHERE flag > 1 ;
+
+-- inspect duplicate transaction_id records
+SELECT *
+FROM bronze.sales_transactions
+WHERE transaction_id IN (
+    SELECT transaction_id
+    FROM bronze.sales_transactions
+    GROUP BY transaction_id
+    HAVING COUNT(*) > 1
+)
+ORDER BY transaction_id, order_line_number;
+
+-- final cleaning and standardization transaction_id
+WITH clean_transaction_id AS 
+(
+    SELECT 
+        *
+    FROM 
+        (
+            SELECT 
+                transaction_id,
+                ROW_NUMBER() OVER(PARTITION BY transaction_id ORDER BY transaction_id) as flag 
+            FROM bronze.sales_transactions
+        ) t
+    WHERE flag = 1 
+)  
+SELECT 
+* 
+FROM clean_transaction_id ;
+
+--=============================================================================================
+--================================= order_id cleaning overview ================================
+--=============================================================================================
+-- order_id data overview 
+SELECT 
+    order_id 
+FROM bronze.sales_transactions ;
+
+-- order_id data profiling 
+SELECT 
+    order_id 
+FROM bronze.sales_transactions 
+WHERE order_id IS NULL 
+   OR TRY_CONVERT(INT, order_id) IS NULL 
+   OR LEN(order_id) < 5 ; 
+
+-- duplicate check in order id 
+SELECT 
+    * 
+FROM 
+(
+    SELECT 
+        order_id ,
+        ROW_NUMBER() OVER(PARTITION BY order_id ORDER BY order_id) as flag
+    FROM bronze.sales_transactions 
+)t WHERE flag > 1 
+ORDER BY flag DESC ;
+ 
+-- final cleaning and standardization order_id
+SELECT
+    CASE 
+        WHEN TRY_CONVERT(INT, order_id) IS NULL OR LEN(order_id) < 5 THEN NULL 
+        ELSE TRY_CONVERT(INT, order_id)
+    END order_id
+FROM bronze.sales_transactions ;
