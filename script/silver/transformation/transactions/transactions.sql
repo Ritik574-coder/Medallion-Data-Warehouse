@@ -450,23 +450,318 @@ CASE TRIM(LOWER(data_source))
     ELSE 'Unknown'
 END AS data_source
 FROM bronze.sales_transactions ;
+
+--#############################################################################################
+--################################# order_line_number validation  #############################
+--#############################################################################################
+SELECT DISTINCT 
+order_line_number
+FROM bronze.sales_transactions
+
+SELECT order_id, customer_id, COUNT(*) as order_line
+FROM bronze.sales_transactions
+GROUP BY order_id, customer_id
+ORDER BY COUNT(*) DESC;
+
+WITH order_line_analysis AS 
+(
+SELECT 
+      CASE 
+            WHEN order_line_number < 1 THEN NULL 
+            WHEN order_line_number > 20 THEN NULL
+            ELSE order_line_number
+      END as order_line_number
+FROM bronze.sales_transactions
+)
+SELECT 
+      order_line_number,
+      COUNT(*) as order_line_number_count,
+      CAST(ROUND(COUNT(*)*100.0/SUM(COUNT(*)) OVER(), 2) as nvarchar) + '%' as percentages
+FROM order_line_analysis
+GROUP BY order_line_number
+ORDER BY order_line_number_count DESC ;
+
+--#############################################################################################
+--################################# quantity_ordered validation  #############################
+--#############################################################################################
+SELECT
+      DISTINCT quantity_ordered
+FROM bronze.sales_transactions ;
+
+SELECT
+      quantity_ordered
+FROM bronze.sales_transactions
+WHERE TRY_CONVERT(INT, quantity_ordered) IS NULL
+AND quantity_ordered IS NOT NULL ;
+
+WITH quantity_ordered_analysis AS 
+(
+SELECT 
+      CASE 
+            WHEN quantity_ordered < 1 THEN NULL 
+            WHEN quantity_ordered > 100 THEN NULL
+            ELSE quantity_ordered
+      END as quantity_ordered
+FROM bronze.sales_transactions 
+)
+SELECT 
+      quantity_ordered,
+      COUNT(*) as quantity_ordered_count,
+      CAST(ROUND(COUNT(*)*100.0/SUM(COUNT(*)) OVER(), 2) as nvarchar) + '%' as percentages
+FROM quantity_ordered_analysis
+GROUP BY quantity_ordered
+ORDER BY quantity_ordered_count DESC ;
+
+--#############################################################################################
+--################################### unit_list_price validation  #############################
+--#############################################################################################
+SELECT DISTINCT 
+      unit_list_price
+FROM bronze.sales_transactions 
+WHERE unit_list_price like '$%' or unit_list_price like '%,%' ;
+
+SELECT
+      unit_list_price
+FROM bronze.sales_transactions 
+WHERE unit_list_price IS NULL 
+      OR TRY_CONVERT(DECIMAL(10,2), unit_list_price) < 1 
+      OR TRY_CONVERT(DECIMAL(10,2), unit_list_price) IS NULL; 
+
+WITH list_price_analysis AS 
+(
+      SELECT 
+            CASE 
+                  WHEN unit_list_price IS NULL THEN NULL 
+                  ELSE TRY_CONVERT(DECIMAL(10, 2), REPLACE(REPLACE(unit_list_price, '$', ''), ',', '')) 
+            END as unit_list_price
+      FROM bronze.sales_transactions 
+)
+SELECT 
+      unit_list_price
+FROM list_price_analysis 
+WHERE unit_list_price IS NULL 
+OR unit_list_price like '$%' or unit_list_price like '%,%' ;
+
+--#############################################################################################
+--################################### discount_pct validation  ################################
+--#############################################################################################
+SELECT DISTINCT 
+      ROUND(discount_pct, 0) as discount_pct
+FROM bronze.sales_transactions ; 
+
+SELECT 
+      CASE 
+            WHEN discount_pct IS NULL OR discount_pct < 0 THEN NULL 
+            ELSE ROUND(discount_pct, 0)
+      END as discount_pct
+FROM bronze.sales_transactions ;
+
+--#############################################################################################
+--################################### unit_selling_price validation  ##########################
+--#############################################################################################
+SELECT 
+      unit_selling_price 
+FROM bronze.sales_transactions 
+WHERE TRIM(unit_selling_price) != unit_selling_price
+      OR unit_selling_price IS NULL 
+      OR unit_selling_price LIKE '%,%'
+      OR unit_selling_price LIKE '$%'; 
+
+WITH unit_selling_price_analysis AS 
+(
+      SELECT 
+            CASE 
+                  WHEN unit_selling_price IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(unit_selling_price, '$', ''), ',', '')) < 0 THEN NULL 
+                  ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(unit_selling_price, '$', ''), ',', ''))
+            END as unit_selling_price
+      FROM bronze.sales_transactions 
+)
+SELECT 
+      unit_selling_price
+FROM unit_selling_price_analysis 
+WHERE TRY_CONVERT(DECIMAL(10,2), unit_selling_price) IS NULL 
+OR unit_selling_price IS NULL  ; 
+
+--#############################################################################################
+--################################### line_total_before_tax validation  #######################
+--#############################################################################################
+SELECT 
+      line_total_before_tax 
+FROM bronze.sales_transactions 
+WHERE TRIM(line_total_before_tax) != line_total_before_tax
+      OR line_total_before_tax IS NULL 
+      OR line_total_before_tax LIKE '%,%'
+      OR line_total_before_tax LIKE '$%'; 
+
+WITH line_total_before_tax_analysis AS 
+(
+      SELECT 
+            CASE 
+                  WHEN line_total_before_tax IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(line_total_before_tax, '$', ''), ',', '')) < 0 THEN NULL 
+                  ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(line_total_before_tax, '$', ''), ',', ''))
+            END as line_total_before_tax
+      FROM bronze.sales_transactions 
+)
+SELECT 
+      line_total_before_tax
+FROM line_total_before_tax_analysis 
+WHERE TRY_CONVERT(DECIMAL(10,2), line_total_before_tax) IS NULL 
+OR line_total_before_tax IS NULL  ; 
+
+--#############################################################################################
+--################################### tax_rate_pct validation  ################################
+--#############################################################################################
+SELECT 
+      ROUND(tax_rate_pct, 0) as tax_rate_pct
+FROM bronze.sales_transactions ; 
+
+SELECT 
+      tax_rate_pct
+FROM bronze.sales_transactions 
+WHERE TRY_CONVERT(INT, ROUND(tax_rate_pct, 0)) IS NULL ; 
+
+SELECT 
+      CASE 
+            WHEN tax_rate_pct IS NULL OR TRY_CONVERT(INT, ROUND(tax_rate_pct, 0)) < 0 THEN NULL 
+            ELSE TRY_CONVERT(INT, ROUND(tax_rate_pct, 0))
+      END as tax_rate_pctl
+FROM bronze.sales_transactions ;
+
+--#############################################################################################
+--################################### tax_amount validation  ##################################
+--#############################################################################################
+SELECT 
+      tax_amount 
+FROM bronze.sales_transactions 
+WHERE TRIM(tax_amount) != tax_amount
+      OR tax_amount IS NULL 
+      OR tax_amount LIKE '%,%'
+      OR tax_amount LIKE '$%'; 
+
+WITH tax_amount_analysis AS 
+(
+      SELECT 
+            CASE 
+                  WHEN tax_amount IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(tax_amount, '$', ''), ',', '')) < 0 THEN NULL 
+                  ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(tax_amount, '$', ''), ',', ''))
+            END as tax_amount
+      FROM bronze.sales_transactions 
+)
+SELECT 
+      tax_amount
+FROM tax_amount_analysis 
+WHERE TRY_CONVERT(DECIMAL(10,2), tax_amount) IS NULL 
+OR tax_amount IS NULL  ; 
+
+--#############################################################################################
+--################################ line_total_with_tax validation  ############################
+--#############################################################################################
+SELECT 
+      line_total_with_tax 
+FROM bronze.sales_transactions 
+WHERE TRIM(line_total_with_tax) != line_total_with_tax
+      OR line_total_with_tax IS NULL 
+      OR line_total_with_tax LIKE '%,%'
+      OR line_total_with_tax LIKE '$%'; 
+
+WITH line_total_with_tax_analysis AS 
+(
+      SELECT 
+            CASE 
+                  WHEN line_total_with_tax IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(line_total_with_tax, '$', ''), ',', '')) < 0 THEN NULL 
+                  ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(line_total_with_tax, '$', ''), ',', ''))
+            END as line_total_with_tax
+      FROM bronze.sales_transactions 
+)
+SELECT 
+      line_total_with_tax
+FROM line_total_with_tax_analysis 
+WHERE TRY_CONVERT(DECIMAL(10,2), line_total_with_tax) IS NULL 
+OR line_total_with_tax IS NULL  ; 
+
+--#############################################################################################
+--################################ cost_price validation  #####################################
+--#############################################################################################
+SELECT 
+      cost_price 
+FROM bronze.sales_transactions 
+WHERE TRIM(cost_price) != cost_price
+      OR cost_price IS NULL 
+      OR cost_price LIKE '%,%'
+      OR cost_price LIKE '$%'; 
+
+WITH cost_price_analysis AS 
+(
+      SELECT 
+            CASE 
+                  WHEN cost_price IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(cost_price, '$', ''), ',', '')) < 0 THEN NULL 
+                  ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(cost_price, '$', ''), ',', ''))
+            END as cost_price
+      FROM bronze.sales_transactions 
+)
+SELECT 
+      cost_price
+FROM cost_price_analysis 
+WHERE TRY_CONVERT(DECIMAL(10,2), cost_price) IS NULL 
+OR cost_price IS NULL  ; 
+
+SELECT 
+count(*)
+FROM bronze.sales_transactions 
+WHERE cost_price IS NULL ;
+
+--#############################################################################################
+--################################ gross_profit validation  ###################################
+--#############################################################################################
+SELECT 
+      gross_profit 
+FROM bronze.sales_transactions 
+WHERE TRIM(gross_profit) != gross_profit
+      OR gross_profit IS NULL 
+      OR gross_profit LIKE '%,%'
+      OR gross_profit LIKE '$%'; 
+
+WITH gross_profit_analysis AS 
+(
+      SELECT 
+            CASE 
+                  WHEN gross_profit IS NULL THEN NULL 
+                  ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(gross_profit, '$', ''), ',', ''))
+            END as gross_profit
+      FROM bronze.sales_transactions 
+)
+SELECT 
+      gross_profit
+FROM gross_profit_analysis 
+WHERE TRY_CONVERT(DECIMAL(10,2), gross_profit) IS NULL 
+OR gross_profit IS NULL  ; 
+
+SELECT 
+      count(*)
+FROM bronze.sales_transactions 
+WHERE gross_profit IS NULL ;
+
 --#############################################################################################
 --#################################### TRANSACTION CLEAN DATA #################################
 --#############################################################################################
 SELECT
-order_date,
-order_month,
-order_day_of_week,
-order_year,
-order_month_name,
-order_quarter
+      order_date,
+      order_month,
+      order_day_of_week,
+      order_year,
+      order_month_name,
+      order_quarter
 FROM bronze.sales_transactions ; 
-
 
 SELECT 
 CONCAT(order_year, '-', order_month_name,'-', order_day_of_week) as order_date
 FROM bronze.sales_transactions ;
 
+SELECT DISTINCT
+      order_month,
+      order_month_name
+FROM bronze.sales_transactions 
+ORDER BY order_month ; 
 
 
 WITH pattern_analysis AS 
@@ -488,18 +783,65 @@ GROUP BY date_pattern
 ORDER BY pattern_count DESC ;
  
 
-SELECT DISTINCT
-      order_month,
-      order_month_name
+SELECT 
+      CASE 
+            WHEN order_date LIKE '__/__/____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 3, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 101)
+            WHEN order_date LIKE '__/__/____' AND TRY_CONVERT(INT, LEFT(order_date, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 103) 
+            ELSE TRY_CONVERT(DATE, order_date, 101)
+      END as order_date
 FROM bronze.sales_transactions 
-ORDER BY order_month ; 
+WHERE order_date LIKE '__/__/____' ;
+
+
+SELECT 
+CASE
+      WHEN order_date LIKE '__-__-____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 3, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 110)
+      WHEN order_date LIKE '__-__-____' AND TRY_CONVERT(INT, LEFT(order_date, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 105) 
+      ELSE TRY_CONVERT(DATE, order_date, 101)
+END as order_date
+FROM bronze.sales_transactions 
+WHERE order_date LIKE '__-__-____';
+
+
+WITH order_date_analysis AS 
+(
+      SELECT 
+            order_month,
+            CASE 
+                  WHEN order_date LIKE '[A-Z][a-z][a-z][a-z]% __, ____' THEN TRY_CONVERT(DATE , order_date)
+                  WHEN order_date LIKE '[A-Z][a-z][a-z] __, ____'       THEN TRY_CONVERT(DATE , order_date)
+                  WHEN order_date LIKE '____/__/__'                     THEN TRY_CONVERT(DATE , order_date)
+                  WHEN order_date LIKE '____-__-__'                     THEN TRY_CONVERT(DATE , order_date)
+
+                  WHEN order_date LIKE '__/__/____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 3, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 101)
+                  WHEN order_date LIKE '__/__/____' AND TRY_CONVERT(INT, LEFT(order_date, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 103) 
+
+                  WHEN order_date LIKE '__-__-____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 3, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 110)
+                  WHEN order_date LIKE '__-__-____' AND TRY_CONVERT(INT, LEFT(order_date, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 105) 
+
+                  ELSE TRY_CONVERT(DATE, TRIM(order_date), 101)
+            END as order_date
+      FROM bronze.sales_transactions 
+      WHERE order_date LIKE '[A-Z][a-z][a-z][a-z]% __, ____'
+         OR order_date LIKE '[A-Z][a-z][a-z] __, ____'
+         OR order_date LIKE '____/__/__'
+         OR order_date LIKE '____-__-__'
+         OR order_date LIKE '__/__/____'
+         OR order_date LIKE '__-__-____'
+)        
+SELECT 
+      DAY(order_date) order_day,
+      MONTH(order_date) as month_new  ,
+      order_month
+FROM order_date_analysis 
+WHERE order_month != MONTH(order_date)
 
 
 --#############################################################################################
 --#################################### TRANSACTION CLEAN DATA #################################
 --#############################################################################################
 
-SELECT 
+SELECT TOP 100
        st.transaction_id
       ,st.order_id
       ,st.customer_id
@@ -579,17 +921,62 @@ SELECT
             ELSE 'Unknown'
       END AS data_source
 
-      ,st.order_line_number
-      ,st.quantity_ordered     
-      ,st.unit_list_price      
-      ,st.discount_pct         
-      ,st.unit_selling_price   
-      ,st.line_total_before_tax
-      ,st.tax_rate_pct
-      ,st.tax_amount
-      ,st.line_total_with_tax
-      ,st.cost_price
-      ,st.gross_profit
+      ,CASE 
+            WHEN order_line_number < 1 THEN NULL 
+            WHEN order_line_number > 20 THEN NULL
+            ELSE order_line_number
+      END as order_line_number
+
+      ,CASE 
+            WHEN quantity_ordered < 1 THEN NULL 
+            WHEN quantity_ordered > 30 THEN NULL
+            ELSE quantity_ordered
+      END as quantity_ordered 
+
+      ,CASE 
+            WHEN unit_list_price IS NULL THEN NULL 
+            ELSE TRY_CONVERT(DECIMAL(10, 2), REPLACE(REPLACE(unit_list_price, '$', ''), ',', '')) 
+      END as unit_list_price 
+
+      ,CASE 
+            WHEN discount_pct IS NULL OR discount_pct < 0 THEN NULL 
+            ELSE ROUND(discount_pct, 0)
+      END as discount_pct
+
+      ,CASE 
+            WHEN unit_selling_price IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(unit_selling_price, '$', ''), ',', '')) < 0 THEN NULL 
+            ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(unit_selling_price, '$', ''), ',', ''))
+      END as unit_selling_price
+
+      ,CASE 
+            WHEN line_total_before_tax IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(line_total_before_tax, '$', ''), ',', '')) < 0 THEN NULL 
+            ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(line_total_before_tax, '$', ''), ',', ''))
+      END as line_total_before_tax
+
+      ,CASE 
+            WHEN tax_rate_pct IS NULL OR TRY_CONVERT(INT, ROUND(tax_rate_pct, 0)) < 0 THEN NULL 
+            ELSE TRY_CONVERT(INT, ROUND(tax_rate_pct, 0))
+      END as tax_rate_pctl
+
+      ,CASE 
+            WHEN tax_amount IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(tax_amount, '$', ''), ',', '')) < 0 THEN NULL 
+            ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(tax_amount, '$', ''), ',', ''))
+      END as tax_amount
+
+      ,CASE 
+            WHEN line_total_with_tax IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(line_total_with_tax, '$', ''), ',', '')) < 0 THEN NULL 
+            ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(line_total_with_tax, '$', ''), ',', ''))
+      END as line_total_with_tax
+
+      ,CASE 
+            WHEN cost_price IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(cost_price, '$', ''), ',', '')) < 0 THEN NULL 
+            ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(cost_price, '$', ''), ',', ''))
+      END as cost_price
+
+      ,CASE 
+            WHEN gross_profit IS NULL THEN NULL 
+            ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(gross_profit, '$', ''), ',', ''))
+      END as gross_profit
 
       ,st.order_date
       ,st.order_year
