@@ -742,7 +742,7 @@ FROM bronze.sales_transactions
 WHERE gross_profit IS NULL ;
 
 --#############################################################################################
---#################################### TRANSACTION CLEAN DATA #################################
+--################################# ORDER_DATE CLEAINING DATA #################################
 --#############################################################################################
 SELECT
       order_date,
@@ -785,7 +785,7 @@ ORDER BY pattern_count DESC ;
 
 SELECT 
       CASE 
-            WHEN order_date LIKE '__/__/____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 3, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 101)
+            WHEN order_date LIKE '__/__/____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 4, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 101)
             WHEN order_date LIKE '__/__/____' AND TRY_CONVERT(INT, LEFT(order_date, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 103) 
             ELSE TRY_CONVERT(DATE, order_date, 101)
       END as order_date
@@ -795,7 +795,7 @@ WHERE order_date LIKE '__/__/____' ;
 
 SELECT 
 CASE
-      WHEN order_date LIKE '__-__-____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 3, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 110)
+      WHEN order_date LIKE '__-__-____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 4, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 110)
       WHEN order_date LIKE '__-__-____' AND TRY_CONVERT(INT, LEFT(order_date, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 105) 
       ELSE TRY_CONVERT(DATE, order_date, 101)
 END as order_date
@@ -813,10 +813,10 @@ WITH order_date_analysis AS
                   WHEN order_date LIKE '____/__/__'                     THEN TRY_CONVERT(DATE , order_date)
                   WHEN order_date LIKE '____-__-__'                     THEN TRY_CONVERT(DATE , order_date)
 
-                  WHEN order_date LIKE '__/__/____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 3, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 101)
+                  WHEN order_date LIKE '__/__/____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 4, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 101)
                   WHEN order_date LIKE '__/__/____' AND TRY_CONVERT(INT, LEFT(order_date, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 103) 
 
-                  WHEN order_date LIKE '__-__-____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 3, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 110)
+                  WHEN order_date LIKE '__-__-____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 4, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 110)
                   WHEN order_date LIKE '__-__-____' AND TRY_CONVERT(INT, LEFT(order_date, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 105) 
 
                   ELSE TRY_CONVERT(DATE, TRIM(order_date), 101)
@@ -828,27 +828,75 @@ WITH order_date_analysis AS
          OR order_date LIKE '____-__-__'
          OR order_date LIKE '__/__/____'
          OR order_date LIKE '__-__-____'
-)        
+)  
 SELECT 
-      DAY(order_date) order_day,
-      MONTH(order_date) as month_new  ,
-      order_month
-FROM order_date_analysis 
-WHERE order_month != MONTH(order_date)
+    CASE
+        WHEN order_month != MONTH(order_date)
+        THEN DATEFROMPARTS(
+                YEAR(order_date),
+                DAY(order_date),
+                MONTH(order_date)
+             )
 
+        ELSE order_date
+    END AS order_date,
+    order_month
+FROM order_date_analysis ;
+
+--#############################################################################################
+--################################# ORDER_DATE CLEAINING DATA #################################
+--#############################################################################################
 
 --#############################################################################################
 --#################################### TRANSACTION CLEAN DATA #################################
 --#############################################################################################
 
-SELECT TOP 100
-       st.transaction_id
-      ,st.order_id
-      ,st.customer_id
-      ,st.product_id 
-      ,st.store_id 
-      ,st.employee_id 
-      ,st.promo_id
+SELECT
+       transaction_id
+      ,order_id
+      ,customer_id
+      ,product_id
+      ,store_id
+      ,employee_id
+      ,promo_id
+      ,promo_name
+      ,sales_channel
+      ,payment_method
+      ,shipping_method
+      ,order_status
+      ,is_returned
+      ,data_source
+      ,order_line_number
+      ,quantity_ordered
+      ,unit_list_price
+      ,discount_pct
+      ,unit_selling_price
+      ,line_total_before_tax
+      ,tax_rate_pct
+      ,tax_amount
+      ,line_total_with_tax
+      ,cost_price
+      ,gross_profit
+
+      ,CASE 
+            WHEN order_month != MONTH(order_date) THEN DATEFROMPARTS(YEAR(order_date), DAY(order_date), MONTH(order_date))
+            ELSE order_date
+      END AS order_date
+
+      ,ship_date
+      ,delivery_date
+      ,record_created
+      ,last_modified
+FROM 
+(
+SELECT
+       transaction_id
+      ,order_id
+      ,customer_id
+      ,product_id 
+      ,store_id 
+      ,employee_id 
+      ,promo_id
 
       ,CASE TRIM(LOWER(promo_name))
             WHEN 'winter clearance' THEN 'Winter Clearance'
@@ -956,7 +1004,7 @@ SELECT TOP 100
       ,CASE 
             WHEN tax_rate_pct IS NULL OR TRY_CONVERT(INT, ROUND(tax_rate_pct, 0)) < 0 THEN NULL 
             ELSE TRY_CONVERT(INT, ROUND(tax_rate_pct, 0))
-      END as tax_rate_pctl
+      END as tax_rate_pct
 
       ,CASE 
             WHEN tax_amount IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(tax_amount, '$', ''), ',', '')) < 0 THEN NULL 
@@ -978,12 +1026,49 @@ SELECT TOP 100
             ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(gross_profit, '$', ''), ',', ''))
       END as gross_profit
 
-      ,st.order_date
-      ,st.order_year
-      ,st.order_month
-      ,st.order_day_of_week
-      ,st.ship_date
-      ,st.delivery_date
-      ,st.record_created_ts
-      ,st.last_modified_ts
-FROM bronze.sales_transactions as st ; 
+      ,CASE 
+            WHEN order_date LIKE '[A-Z][a-z][a-z][a-z]% __, ____' THEN TRY_CONVERT(DATE , order_date)
+            WHEN order_date LIKE '[A-Z][a-z][a-z] __, ____'       THEN TRY_CONVERT(DATE , order_date)
+            WHEN order_date LIKE '____/__/__'                     THEN TRY_CONVERT(DATE , order_date)
+            WHEN order_date LIKE '____-__-__'                     THEN TRY_CONVERT(DATE , order_date)
+            WHEN order_date LIKE '__/__/____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 4, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 101)
+            WHEN order_date LIKE '__-__-____' AND TRY_CONVERT(INT, SUBSTRING(order_date, 4, 2)) > 12 THEN TRY_CONVERT(DATE, order_date, 110)
+            WHEN order_date LIKE '__/__/____' AND TRY_CONVERT(INT, LEFT(order_date, 2)) > 12         THEN TRY_CONVERT(DATE, order_date, 103) 
+            WHEN order_date LIKE '__-__-____' AND TRY_CONVERT(INT, LEFT(order_date, 2)) > 12         THEN TRY_CONVERT(DATE, order_date, 105) 
+            ELSE TRY_CONVERT(DATE, TRIM(order_date), 101)
+      END as order_date
+
+      ,order_month
+
+      ,CASE 
+            WHEN ship_date LIKE '[A-Z][a-z][a-z][a-z]% __, ____' THEN TRY_CONVERT(DATE , ship_date)
+            WHEN ship_date LIKE '[A-Z][a-z][a-z] __, ____'       THEN TRY_CONVERT(DATE , ship_date)
+            WHEN ship_date LIKE '____/__/__'                     THEN TRY_CONVERT(DATE , ship_date)
+            WHEN ship_date LIKE '____-__-__'                     THEN TRY_CONVERT(DATE , ship_date)
+            WHEN ship_date LIKE '__/__/____' AND TRY_CONVERT(INT, SUBSTRING(ship_date, 4, 2)) > 12 THEN TRY_CONVERT(DATE, ship_date, 101)
+            WHEN ship_date LIKE '__-__-____' AND TRY_CONVERT(INT, SUBSTRING(ship_date, 4, 2)) > 12 THEN TRY_CONVERT(DATE, ship_date, 110)
+            WHEN ship_date LIKE '__/__/____' AND TRY_CONVERT(INT, LEFT(ship_date, 2)) > 12         THEN TRY_CONVERT(DATE, ship_date, 103) 
+            WHEN ship_date LIKE '__-__-____' AND TRY_CONVERT(INT, LEFT(ship_date, 2)) > 12         THEN TRY_CONVERT(DATE, ship_date, 105) 
+            ELSE TRY_CONVERT(DATE, TRIM(ship_date), 101)
+      END as ship_date
+
+      ,CASE 
+            WHEN delivery_date LIKE '[A-Z][a-z][a-z][a-z]% __, ____' THEN TRY_CONVERT(DATE , delivery_date)
+            WHEN delivery_date LIKE '[A-Z][a-z][a-z] __, ____'       THEN TRY_CONVERT(DATE , delivery_date)
+            WHEN delivery_date LIKE '____/__/__'                     THEN TRY_CONVERT(DATE , delivery_date)
+            WHEN delivery_date LIKE '____-__-__'                     THEN TRY_CONVERT(DATE , delivery_date)
+            WHEN delivery_date LIKE '__/__/____' AND TRY_CONVERT(INT, SUBSTRING(delivery_date, 4, 2)) > 12 THEN TRY_CONVERT(DATE, delivery_date, 101)
+            WHEN delivery_date LIKE '__-__-____' AND TRY_CONVERT(INT, SUBSTRING(delivery_date, 4, 2)) > 12 THEN TRY_CONVERT(DATE, delivery_date, 110)
+            WHEN delivery_date LIKE '__/__/____' AND TRY_CONVERT(INT, LEFT(delivery_date, 2)) > 12         THEN TRY_CONVERT(DATE, delivery_date, 103) 
+            WHEN delivery_date LIKE '__-__-____' AND TRY_CONVERT(INT, LEFT(delivery_date, 2)) > 12         THEN TRY_CONVERT(DATE, delivery_date, 105) 
+            ELSE TRY_CONVERT(DATE, TRIM(delivery_date), 101)
+      END as delivery_date
+
+      ,TRY_CONVERT(DATE, record_created_ts) as record_created
+      ,TRY_CONVERT(DATE, last_modified_ts ) as last_modified
+FROM bronze.sales_transactions 
+ )t ; 
+
+
+
+ SELECT * FROM bronze.sales_transactions_view ; 
