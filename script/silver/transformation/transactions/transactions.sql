@@ -846,11 +846,155 @@ FROM order_date_analysis ;
 --#############################################################################################
 --################################# ORDER_DATE CLEAINING DATA #################################
 --#############################################################################################
+ SELECT * FROM bronze.sales_transactions_view ; 
 
+SELECT 
+      order_date,
+      ship_date,
+      delivery_date
+FROM bronze.sales_transactions_view ;
+
+SELECT 
+      DAY(order_date) as day 
+FROM bronze.sales_transactions_view ;
+
+SELECT 
+*
+FROM bronze.new_sales ; 
+
+SELECT 
+      order_month,
+      MONTH(order_date) as ex_order_month
+FROM bronze.new_sales
+WHERE order_month != MONTH(order_date) ;
+
+SELECT 
+      order_month,
+      MONTH(order_date) as ex_order_month
+FROM bronze.new_sales
+WHERE order_month = MONTH(order_date) ;
+
+--#############################################################################################
+--################################## SHIP DATE CLEAINING DATA #################################
+--#############################################################################################
+SELECT 
+      MONTH(order_date) as order_month,
+      MONTH(ship_date)  as ship_month ,
+      DAY(order_date)   as order_day  ,
+      DAY(ship_date)    as ship_day 
+FROM bronze.sales_transactions_view 
+WHERE MONTH(order_date) = MONTH(ship_date);
+
+SELECT 
+      ship_date
+FROM bronze.sales_transactions_view 
+WHERE ship_date IS NULL ;
+
+SELECT 
+      MONTH(order_date) as order_month,
+      MONTH(ship_date)  as ship_month 
+FROM bronze.sales_transactions_view 
+WHERE MONTH(order_date) <  MONTH(ship_date);
+
+SELECT 
+DATEDIFF(DAY ,order_date, ship_date) as day_diff
+FROM bronze.sales_transactions_view ;
+
+SELECT
+      order_date,
+      ship_date,
+      DATEDIFF(DAY ,order_date, ship_date) as day_diff,
+      shipping_method
+FROM bronze.sales_transactions_view 
+WHERE shipping_method = 'Same Day Delivery';
+
+SELECT 
+DATEDIFF(DAY ,order_date, ship_date) as day_diff
+FROM bronze.sales_transactions_view 
+WHERE ship_date IS NULL ;
+
+SELECT 
+DATEDIFF(DAY ,order_date, ship_date) as day_diff
+FROM bronze.sales_transactions_view 
+WHERE DATEDIFF(DAY ,order_date, ship_date) < 0 ;
+
+
+WITH date_cleaning AS 
+(
+      SELECT 
+            order_date,
+            ship_date,
+            delivery_date,
+      CASE
+            WHEN DATEDIFF(DAY ,order_date, ship_date) < 0 THEN DATEFROMPARTS(YEAR(ship_date), DAY(ship_date), MONTH(ship_date))
+            WHEN DATEDIFF(DAY ,order_date, ship_date) > 50 THEN DATEFROMPARTS(YEAR(ship_date), DAY(ship_date), MONTH(ship_date))
+            ELSE ship_date 
+      END as new_ship
+FROM bronze.sales_transactions_view 
+ ) 
+SELECT 
+      order_date,
+      ship_date,
+      delivery_date,
+      new_ship,
+      DATEDIFF(DAY, order_date, ship_date) as old_day,
+      DATEDIFF(DAY, order_date, new_ship) as new_date
+FROM date_cleaning 
+WHERE DATEDIFF(DAY, order_date, new_ship) >= 30 ;
+
+
+SELECT
+    YEAR(order_date) AS yr,
+    MONTH(order_date) AS mn,
+    AVG(DATEDIFF(DAY, order_date, ship_date) * 1.0) AS avg_ship_days
+FROM bronze.sales_transactions_view
+WHERE ship_date IS NOT NULL
+GROUP BY
+    YEAR(order_date),
+    MONTH(order_date)
+ORDER BY YEAR(order_date),
+    MONTH(order_date) DESC ;
+
+
+WITH monthly_avg AS (
+    SELECT
+        YEAR(order_date) AS yr,
+        MONTH(order_date) AS mn,
+        AVG(DATEDIFF(DAY, order_date, ship_date)) AS avg_ship_days
+    FROM bronze.sales_transactions_view
+    WHERE ship_date IS NOT NULL
+      AND ship_date >= order_date
+    GROUP BY
+        YEAR(order_date),
+        MONTH(order_date)
+)
+
+SELECT
+    t.order_date,
+    t.ship_date,
+    DATEADD(
+        DAY,
+        CAST(m.avg_ship_days AS INT),
+        t.order_date
+    ) AS cleaned_ship_date
+FROM bronze.sales_transactions_view t
+JOIN monthly_avg m
+    ON YEAR(t.order_date) = m.yr
+   AND MONTH(t.order_date) = m.mn
+WHERE t.ship_date IS NULL
+   OR t.ship_date < t.order_date;
+
+SELECT
+      order_date,
+      order_month,
+      ship_date,
+      delivery_date,
+      record_created,
+      last_modified
+FROM bronze.new_sales;
 --#############################################################################################
 --#################################### TRANSACTION CLEAN DATA #################################
 --#############################################################################################
-
 SELECT
        transaction_id
       ,order_id
@@ -1071,4 +1215,3 @@ FROM bronze.sales_transactions
 
 
 
- SELECT * FROM bronze.sales_transactions_view ; 
