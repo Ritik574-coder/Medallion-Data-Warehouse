@@ -993,7 +993,7 @@ SELECT
       MONTH(order_date) as ex_order_month
 FROM bronze.new_sales
 WHERE order_month = MONTH(order_date) ;
-
+ 
 --#############################################################################################
 --################################## SHIP DATE CLEAINING DATA #################################
 --#############################################################################################
@@ -1206,6 +1206,13 @@ SELECT
       last_modified
 FROM last_modified_analysis 
 WHERE last_modified IS NULL ; 
+
+-- data qulity check 
+SELECT 
+* 
+FROM bronze.date_analysis 
+WHERE last_modified < record_created ;
+
 --#############################################################################################
 --#################################### TRANSACTION CLEAN DATA #################################
 --#############################################################################################
