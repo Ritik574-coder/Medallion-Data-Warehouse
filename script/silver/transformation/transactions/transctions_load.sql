@@ -29,8 +29,8 @@ CREATE TABLE silver.sales_transactions
     tax_amount             DECIMAL(12,2),
     line_total_with_tax    DECIMAL(12,2),
 
-    cost_price             DECIMAL(10,2),
-    gross_profit           DECIMAL(12,2),
+--    cost_price             DECIMAL(10,2),
+--    gross_profit           DECIMAL(12,2),
 
     order_date             DATE,
     ship_date              DATE,
@@ -65,8 +65,8 @@ INSERT INTO silver.sales_transactions
       ,tax_rate_pct
       ,tax_amount
       ,line_total_with_tax
-      ,cost_price
-      ,gross_profit 
+--      ,cost_price
+--      ,gross_profit 
       ,order_date
       ,ship_date
       ,delivery_date
@@ -74,7 +74,7 @@ INSERT INTO silver.sales_transactions
       ,last_modified
 )
 SELECT
-       transaction_id
+      transaction_id
       ,order_id
       ,customer_id
       ,product_id
@@ -92,13 +92,18 @@ SELECT
       ,quantity_ordered
       ,unit_list_price
       ,discount_pct
-      ,unit_selling_price
-      ,line_total_before_tax
+
+      ,ROUND(unit_list_price * (1 - discount_pct/100), 2) as unit_selling_price
+
+      ,ROUND(quantity_ordered * ROUND(unit_list_price * (1 - discount_pct/100.0), 2),2) AS line_total_before_tax
+
       ,tax_rate_pct
       ,tax_amount
-      ,line_total_with_tax
-      ,cost_price
-      ,gross_profit
+
+      ,line_total_before_tax + tax_amount as line_total_with_tax
+
+--      ,cost_price
+--      ,gross_profit
 
       ,CASE 
             WHEN order_month != MONTH(order_date) THEN DATEFROMPARTS(YEAR(order_date), DAY(order_date), MONTH(order_date))
@@ -223,7 +228,7 @@ SELECT
       END as unit_list_price 
 
       ,CASE 
-            WHEN discount_pct IS NULL OR discount_pct < 0 THEN NULL 
+            WHEN discount_pct IS NULL OR discount_pct < 0 OR discount_pct > 100 THEN NULL 
             ELSE ROUND(discount_pct, 0)
       END as discount_pct
 
@@ -238,7 +243,7 @@ SELECT
       END as line_total_before_tax
 
       ,CASE 
-            WHEN tax_rate_pct IS NULL OR TRY_CONVERT(INT, ROUND(tax_rate_pct, 0)) < 0 THEN NULL 
+            WHEN tax_rate_pct IS NULL OR TRY_CONVERT(INT, ROUND(tax_rate_pct, 0)) < 0 OR TRY_CONVERT(INT, ROUND(tax_rate_pct, 0)) > 100 THEN NULL 
             ELSE TRY_CONVERT(INT, ROUND(tax_rate_pct, 0))
       END as tax_rate_pct
 
@@ -252,15 +257,15 @@ SELECT
             ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(line_total_with_tax, '$', ''), ',', ''))
       END as line_total_with_tax
 
-      ,CASE 
-            WHEN cost_price IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(cost_price, '$', ''), ',', '')) < 0 THEN NULL 
-            ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(cost_price, '$', ''), ',', ''))
-      END as cost_price
-
-      ,CASE 
-            WHEN gross_profit IS NULL THEN NULL 
-            ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(gross_profit, '$', ''), ',', ''))
-      END as gross_profit
+--      ,CASE 
+--            WHEN cost_price IS NULL OR TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(cost_price, '$', ''), ',', '')) < 0 THEN NULL 
+--            ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(cost_price, '$', ''), ',', ''))
+--      END as cost_price
+--
+--      ,CASE 
+--            WHEN gross_profit IS NULL THEN NULL 
+--            ELSE TRY_CONVERT(DECIMAL(10,2), REPLACE(REPLACE(gross_profit, '$', ''), ',', ''))
+--      END as gross_profit
 
       ,CASE 
             WHEN order_date LIKE '[A-Z][a-z][a-z][a-z]% __, ____' THEN TRY_CONVERT(DATE , order_date)
@@ -302,8 +307,9 @@ SELECT
 
       ,TRY_CONVERT(DATE, record_created_ts) as record_created
       ,TRY_CONVERT(DATE, last_modified_ts ) as last_modified
+      ,ROW_NUMBER() OVER(PARTITION BY transaction_id ORDER BY last_modified_ts DESC) AS rn
 FROM bronze.sales_transactions 
- )t ; 
+ )t WHERE rn = 1; 
 
 
 
