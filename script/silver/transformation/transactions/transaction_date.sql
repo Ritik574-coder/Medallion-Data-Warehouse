@@ -154,47 +154,146 @@ SELECT
 FROM bronze.sales_transactions_view ;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 -- Ship Date Correction And Validation
+
 WITH date_cleaning AS 
 (
-      SELECT 
-            order_date,
-            ship_date,
-            delivery_date,
-      CASE
-            WHEN DATEDIFF(DAY ,order_date, ship_date) < 0 THEN DATEFROMPARTS(YEAR(ship_date), DAY(ship_date), MONTH(ship_date))
-            WHEN DATEDIFF(DAY ,order_date, ship_date) > 15 THEN DATEFROMPARTS(YEAR(ship_date), DAY(ship_date), MONTH(ship_date))
-            WHEN ship_date IS NULL THEN DATEADD(DAY, 7, order_date)
-            ELSE ship_date 
-      END as new_ship
+SELECT
+     transaction_id
+    ,order_id
+    ,customer_id
+    ,product_id
+    ,store_id
+    ,employee_id
+    ,promo_id
+    ,promo_name
+    ,sales_channel
+    ,payment_method
+    ,shipping_method
+    ,order_status
+    ,is_returned
+    ,data_source
+    ,order_line_number
+    ,quantity_ordered
+    ,unit_list_price
+    ,discount_pct
+    ,unit_selling_price
+    ,line_total_before_tax
+    ,tax_rate_pct
+    ,tax_amount
+    ,line_total_with_tax
+    ,order_date
+    ,CASE
+        WHEN DATEDIFF(DAY ,order_date, ship_date) < 0 THEN DATEFROMPARTS(YEAR(ship_date), DAY(ship_date), MONTH(ship_date))
+        WHEN DATEDIFF(DAY ,order_date, ship_date) > 15 THEN DATEFROMPARTS(YEAR(ship_date), DAY(ship_date), MONTH(ship_date))
+        WHEN ship_date IS NULL THEN DATEADD(DAY, 7, order_date)
+        ELSE ship_date 
+    END as ship_date 
+    ,delivery_date
+    ,record_created
+    ,last_modified
 FROM bronze.sales_transactions_view 
- ),
-delivery_cleaning AS
+ )
+,delivery_cleaning AS
 (
 SELECT 
-      order_date,
-      delivery_date,
-      new_ship,
-      DATEDIFF(DAY, order_date, new_ship) as new_date
+     transaction_id
+    ,order_id
+    ,customer_id
+    ,product_id
+    ,store_id
+    ,employee_id
+    ,promo_id
+    ,promo_name
+    ,sales_channel
+    ,payment_method
+    ,shipping_method
+    ,order_status
+    ,is_returned
+    ,data_source
+    ,order_line_number
+    ,quantity_ordered
+    ,unit_list_price
+    ,discount_pct
+    ,unit_selling_price
+    ,line_total_before_tax
+    ,tax_rate_pct
+    ,tax_amount
+    ,line_total_with_tax
+    ,order_date
+    ,ship_date 
+    ,CASE 
+        WHEN DATEDIFF(DAY, ship_date , delivery_date) >  17 THEN DATEFROMPARTS(YEAR(delivery_date), DAY(delivery_date), MONTH(delivery_date))
+        WHEN DATEDIFF(DAY, ship_date , delivery_date) < -15 THEN DATEFROMPARTS(YEAR(delivery_date), DAY(delivery_date), MONTH(delivery_date))
+        ELSE delivery_date
+    END as delivery_date
+    ,record_created
+    ,last_modified
 FROM date_cleaning 
-WHERE new_ship > delivery_date 
+)
+INSERT INTO silver.sales_transactions
+(
+       transaction_id
+      ,order_id
+      ,customer_id
+      ,product_id
+      ,store_id
+      ,employee_id
+      ,promo_id
+      ,promo_name
+      ,sales_channel
+      ,payment_method
+      ,shipping_method
+      ,order_status
+      ,is_returned
+      ,data_source
+      ,order_line_number
+      ,quantity_ordered
+      ,unit_list_price
+      ,discount_pct
+      ,unit_selling_price
+      ,line_total_before_tax
+      ,tax_rate_pct
+      ,tax_amount
+      ,line_total_with_tax
+      ,order_date
+      ,ship_date
+      ,delivery_date
+      ,record_created
+      ,last_modified
 )
 SELECT 
-    * 
-FROM delivery_cleaning ;
+    transaction_id
+    ,order_id
+    ,customer_id
+    ,product_id
+    ,store_id
+    ,employee_id
+    ,promo_id
+    ,promo_name
+    ,sales_channel
+    ,payment_method
+    ,shipping_method
+    ,order_status
+    ,is_returned
+    ,data_source
+    ,order_line_number
+    ,quantity_ordered
+    ,unit_list_price
+    ,discount_pct
+    ,unit_selling_price
+    ,line_total_before_tax
+    ,tax_rate_pct
+    ,tax_amount
+    ,line_total_with_tax
+    ,order_date
+    ,ship_date
+    ,CASE 
+       WHEN DATEDIFF(DAY, ship_date , delivery_date) < 0 THEN ship_date 
+       ELSE delivery_date
+    END as delivery_date
+    ,record_created
+    ,last_modified
+FROM delivery_cleaning 
 
-
+;
