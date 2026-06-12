@@ -1,6 +1,6 @@
 SELECT
-* FROM bronze.sales_transactions_view ; 
-
+    * 
+FROM bronze.sales_transactions_view ; 
 
 SELECT 
     order_line_number,
@@ -107,4 +107,3 @@ SELECT
     gross_profit,
     ROUND(line_total_before_tax - cost_price_, 2) AS recalculated_gp
 FROM profit_analysis;
-

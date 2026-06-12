@@ -100,7 +100,7 @@ SELECT
       ,tax_rate_pct
       ,tax_amount
 
-      ,line_total_before_tax + tax_amount as line_total_with_tax
+      ,ROUND(quantity_ordered * ROUND(unit_list_price * (1 - discount_pct/100.0), 2),2) + tax_amount AS line_total_with_tax
 
 --      ,cost_price
 --      ,gross_profit
