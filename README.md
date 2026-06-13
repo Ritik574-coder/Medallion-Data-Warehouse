@@ -35,21 +35,7 @@ The pipeline currently focuses on database setup, raw ingestion, and detailed Si
 
 ## Architecture
 
-```text
-Raw CSV Files
-     |
-     v
-Bronze Schema
-Raw ingestion tables loaded with BULK INSERT
-     |
-     v
-Silver Schema
-Cleaned, standardized, validated domain tables
-     |
-     v
-Gold Schema
-Future business-ready marts and dashboards
-```
+![Data Flow Diagram](https://github.com/Ritik574-coder/Medallion-Data-Warehouse/blob/main/docs/data_architecture.png)
 
 ## Business Domain
 
