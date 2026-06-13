@@ -51,41 +51,114 @@ The dataset models a retail business with operational data across:
 
 These domains support common analytics use cases such as sales performance, inventory valuation, customer segmentation, store operations, return behavior, product quality, and channel analysis.
 
-## Repository Structure
+## Project Structure
 
 ```text
-.
-|-- dataset/
-|   |-- raw_customers.csv
-|   |-- raw_employees.csv
-|   |-- raw_inventory_snapshots.csv
-|   |-- raw_products.csv
-|   |-- raw_returns.csv
-|   |-- raw_reviews.csv
-|   |-- raw_sales_transactions.csv
-|   `-- raw_stores.csv
-|-- script/
-|   |-- init_databse.sql
-|   |-- bronze/
-|   |   |-- ddl_bronze.sql
-|   |   `-- proc_bronze.sql
-|   `-- silver/
-|       |-- transform/
-|       |   |-- ddl_silver.sql
-|       |   `-- proc_silver.sql
-|       `-- transformation/
-|           |-- customers/
-|           |-- employees/
-|           |-- inventory/
-|           |-- products/
-|           |-- returns/
-|           |-- reviews/
-|           |-- stores/
-|           `-- transactions/
-|-- env_setup_command.sh
-|-- SECURITY.md
-|-- LICENSE
-`-- README.md
+Medallion-Data-Warehouse/
+│
+├── .github/                                    # GitHub automation and community management
+│   ├── ISSUE_TEMPLATE/                         # Issue templates for contributors
+│   │   ├── bug_report.yml                      # Bug reporting template
+│   │   ├── docs_improvement.yml                # Documentation improvement template
+│   │   └── feature_request.yml                 # Feature request template
+│   │
+│   ├── PULL_REQUEST_TEMPLATE.md                # Standard pull request template
+│   │
+│   └── workflows/
+│       └── pr-agent.yml                        # Automated PR review workflow
+│
+├── .qodo/                                      # Qodo AI configuration
+│   ├── agents/                                 # AI agent definitions
+│   └── workflows/                              # AI workflow definitions
+│
+├── dataset/                                    # Source datasets
+│   ├── raw_customers.csv                       # Customer master dataset
+│   ├── raw_employees.csv                       # Employee master dataset
+│   ├── raw_inventory_snapshots.csv             # Inventory snapshot dataset
+│   ├── raw_products.csv                        # Product catalog dataset
+│   ├── raw_returns.csv                         # Product returns dataset
+│   ├── raw_reviews.csv                         # Customer reviews dataset
+│   ├── raw_sales_transactions.csv              # Sales transaction dataset
+│   └── raw_stores.csv                          # Store master dataset
+│
+├── docs/                                       # Project documentation assets
+|   ├──PROJECT_STRUCTURE.md                     # All info about this project 
+│   ├── data_architecture.png                   # Medallion architecture diagram
+│   ├── digram.png                              # Project walkthrough demo
+│   └── Screencast.gif                          # Data model / relationship diagram
+│                                               
+│
+├── script/                                     # Core data warehouse implementation
+│   │
+│   ├── init_databse.sql                        # Database and schema initialization
+│   │
+│   ├── bronze/                                 # Bronze layer (raw ingestion)
+│   │   ├── ddl_bronze.sql                      # Bronze table definitions
+│   │   └── proc_bronze.sql                     # Bronze data loading procedures
+│   │
+│   ├── silver/                                 # Silver layer (cleansing & standardization)
+│   │   │
+│   │   ├── transform/
+│   │   │   ├── ddl_silver.sql                  # Silver table definitions
+│   │   │   └── proc_silver.sql                 # Silver transformation procedures
+│   │   │
+│   │   └── transformation/
+│   │
+│   │       ├── customers/
+│   │       │   ├── customers.sql               # Customer transformation rules
+│   │       │   ├── customers_load.sql          # Customer load process
+│   │       │   └── customers.md                # Customer transformation documentation
+│   │       │
+│   │       ├── employees/
+│   │       │   ├── employees.sql               # Employee transformation rules
+│   │       │   ├── employees_load.sql          # Employee load process
+│   │       │   └── employees.md                # Employee transformation documentation
+│   │       │
+│   │       ├── inventory/
+│   │       │   ├── inventory.sql               # Inventory transformation rules
+│   │       │   ├── inventory_load.sql          # Inventory load process
+│   │       │   └── inventory.md                # Inventory transformation documentation
+│   │       │
+│   │       ├── products/
+│   │       │   ├── product.sql                 # Product transformation rules
+│   │       │   ├── products_load.sql           # Product load process
+│   │       │   └── product.md                  # Product transformation documentation
+│   │       │
+│   │       ├── returns/
+│   │       │   ├── return.sql                  # Returns transformation rules
+│   │       │   ├── returns_load.sql            # Returns load process
+│   │       │   └── return.md                   # Returns transformation documentation
+│   │       │
+│   │       ├── reviews/
+│   │       │   ├── reviews.sql                 # Reviews transformation rules
+│   │       │   ├── reviews_load.sql            # Reviews load process
+│   │       │   └── reviews.md                  # Reviews transformation documentation
+│   │       │
+│   │       ├── stores/
+│   │       │   ├── stores.sql                  # Stores transformation rules
+│   │       │   ├── stores_load.sql             # Stores load process
+│   │       │   └── stores.md                   # Stores transformation documentation
+│   │       │
+│   │       └── transactions/
+│   │           ├── transactions.sql            # Core transaction transformations
+│   │           ├── transaction_cleaning.sql    # Transaction data quality rules
+│   │           ├── transaction_date.sql        # Transaction date handling logic
+│   │           ├── transctions_load.sql        # Transaction load process
+│   │           └── transactions.md             # Transaction transformation documentation
+│   │
+│   └── gold/                                   # Gold layer (analytics & reporting)
+│       └── ddl_gold.sql                        # Gold layer table definitions
+│
+├── .gitignore                                  # Git ignore rules
+├── README.md                                   # Project overview and setup guide
+├── LICENSE                                     # Open-source license
+├── CHANGELOG.md                                # Release history
+├── CONTRIBUTING.md                             # Contribution guidelines
+├── CODE_OF_CONDUCT.md                          # Community standards
+├── SECURITY.md                                 # Security policy
+│
+├── docker-compose.yml                          # SQL Server container configuration
+└── env_setup_command.sh                        # Automated environment setup
 ```
 
 ## Dataset Inventory
