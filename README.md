@@ -1,4 +1,4 @@
-# Medallion Data Warehouse
+# 🏛️ Medallion Data Warehouse 
 
 A Microsoft SQL Server data warehouse project that implements the Medallion Architecture for retail analytics. The repository contains raw CSV source data, database initialization scripts, Bronze ingestion logic, and Silver transformation logic for customers, employees, inventory, products, returns, reviews, stores, and sales transactions.
 
@@ -6,11 +6,18 @@ The project is designed as a practical data engineering portfolio project: it de
 
 ## Project Overview
 
-This project builds a retail data warehouse using a layered Medallion Architecture:
+### Goal
+The **Medallion-Data-Warehouse** project implements a modern data architecture for a retail domain using the Medallion Pattern (Bronze → Silver → Gold layers). The project provides a fully containerized SQL Server environment with automated data ingestion, transformation, and business-ready analytics.
 
-- **Bronze Layer**: Raw source-aligned tables loaded from CSV files.
-- **Silver Layer**: Cleaned, standardized, and analytics-ready tables.
-- **Gold Layer**: Schema is created for future business marts and reporting models.
+### Architecture
+- **Pattern**: Three-layer Medallion Architecture (raw → cleansed → refined)
+- **Technology Stack**: Microsoft SQL Server 2022, T-SQL, Docker/Docker Compose, CSV ingestion
+- **Scope**: Retail enterprise data (8 core entities: customers, employees, products, stores, inventory, sales, returns, reviews)
+
+### Medallion Design Implementation
+1. **Bronze Layer**: Raw data ingestion from source files with minimal transformation, source-aligned schema
+2. **Silver Layer**: Cleaned, standardized data with applied business rules, defensive parsing, and data quality enforcement
+3. **Gold Layer**: Business-ready analytics models and reporting dimensions (currently in development)
 
 The pipeline currently focuses on database setup, raw ingestion, and detailed Silver transformations and data modeling . It uses SQL Server scripts for DDL, stored procedures, data profiling, and transformation and business logic and more.....
 
@@ -31,6 +38,10 @@ The dataset models a retail business with operational data across:
 - Customer reviews
 
 These domains support analytics use cases such as sales performance, inventory valuation, customer segmentation, store operations, return behavior, product quality, and channel analysis.
+
+## 🧩 Entity Relationship Diagram (ERD)
+
+![Entity Relationship Diagram](https://github.com/Ritik574-coder/Medallion-Data-Warehouse/blob/main/docs/Screencast%20from%202026-06-13%2010-24-36.gif)
 
 ## Project Structure
 
