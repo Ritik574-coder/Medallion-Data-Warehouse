@@ -4,25 +4,6 @@ A Microsoft SQL Server data warehouse project that implements the Medallion Arch
 
 The project is designed as a practical data engineering portfolio project: it demonstrates raw data ingestion, schema design, full-refresh loading, data quality profiling, standardization rules, and curated analytical tables.
 
-## Table of Contents
-
-- [Project Overview](#project-overview)
-- [Architecture](#architecture)
-- [Business Domain](#business-domain)
-- [Repository Structure](#repository-structure)
-- [Dataset Inventory](#dataset-inventory)
-- [Technology Stack](#technology-stack)
-- [Prerequisites](#prerequisites)
-- [Setup and Execution](#setup-and-execution)
-- [Data Pipeline Flow](#data-pipeline-flow)
-- [Bronze Layer](#bronze-layer)
-- [Silver Layer](#silver-layer)
-- [Transformation Highlights](#transformation-highlights)
-- [Data Quality Rules](#data-quality-rules)
-- [Security Notes](#security-notes)
-- [Roadmap](#roadmap)
-- [License](#license)
-
 ## Project Overview
 
 This project builds a retail data warehouse using a layered Medallion Architecture:
@@ -31,7 +12,7 @@ This project builds a retail data warehouse using a layered Medallion Architectu
 - **Silver Layer**: Cleaned, standardized, and analytics-ready tables.
 - **Gold Layer**: Schema is created for future business marts and reporting models.
 
-The pipeline currently focuses on database setup, raw ingestion, and detailed Silver transformations. It uses SQL Server scripts for DDL, stored procedures, data profiling, and transformation logic.
+The pipeline currently focuses on database setup, raw ingestion, and detailed Silver transformations and data modeling . It uses SQL Server scripts for DDL, stored procedures, data profiling, and transformation and business logic and more.....
 
 ## Architecture
 
@@ -49,7 +30,7 @@ The dataset models a retail business with operational data across:
 - Product returns
 - Customer reviews
 
-These domains support common analytics use cases such as sales performance, inventory valuation, customer segmentation, store operations, return behavior, product quality, and channel analysis.
+These domains support analytics use cases such as sales performance, inventory valuation, customer segmentation, store operations, return behavior, product quality, and channel analysis.
 
 ## Project Structure
 
@@ -161,26 +142,13 @@ Medallion-Data-Warehouse/
 └── env_setup_command.sh                        # Automated environment setup
 ```
 
-## Dataset Inventory
-
-| File | Domain | Approx. Rows Including Header |
-| --- | --- | ---: |
-| `raw_customers.csv` | Customer master data | 641 |
-| `raw_employees.csv` | Employee data | 101 |
-| `raw_inventory_snapshots.csv` | Inventory snapshots | 561 |
-| `raw_products.csv` | Product catalog | 71 |
-| `raw_returns.csv` | Return transactions | 601 |
-| `raw_reviews.csv` | Customer reviews | 2,001 |
-| `raw_sales_transactions.csv` | Sales order lines | 21,575 |
-| `raw_stores.csv` | Store master data | 51 |
-
 ## Technology Stack
 
 - **Database**: Microsoft SQL Server 2022
 - **Runtime**: Docker
 - **Language**: T-SQL
 - **Data Format**: CSV
-- **Optional BI Tooling**: Apache Superset command references are included in `env_setup_command.sh`
+- **Optional BI Tooling**: Apache Superset 
 
 ## Prerequisites
 
@@ -452,7 +420,7 @@ Common data quality patterns used across the project:
 
 ## Roadmap
 
-Planned or recommended next improvements:
+My Planned to next improvements:
 
 - Build Gold layer fact and dimension models
 - Add stored procedure orchestration for all Silver loads
