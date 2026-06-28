@@ -17,7 +17,7 @@ The format is based on Keep a Changelog and follows Semantic Versioning.
 
 - `README.md` rewritten for faster onboarding and clearer scope.
 
-## [0.1.0] - 2026-05-12
+## [0.1.0] - 2026-05-15
 
 ### Added
 
