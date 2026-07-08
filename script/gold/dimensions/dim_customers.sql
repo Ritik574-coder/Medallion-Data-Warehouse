@@ -1,10 +1,12 @@
-CREATE VIEW gold.dim_customers AS
+ALTER VIEW gold.dim_customers AS 
 WITH customer_enriched AS 
 (
 SELECT 
     customer_id,
     TRIM(CONCAT(title, ' ', first_name, ' ', last_name)) as full_name,
     gender,
+
+    date_of_birth,
 
     DATEDIFF(YEAR, date_of_birth, GETDATE())
     -
@@ -37,6 +39,7 @@ SELECT
     customer_id,
     full_name,
     gender,
+    date_of_birth,
     age,
     CASE 
         WHEN age IS NULL THEN 'Unknown'
@@ -59,8 +62,9 @@ SELECT
     customer_segment,
     loyalty_points,
     is_active,
-    account_created_date,
     preferred_channel,
     annual_income_usd,
-    company
+    company,
+    account_created_date
 FROM customer_enriched  ; 
+GO
