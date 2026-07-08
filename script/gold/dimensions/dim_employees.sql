@@ -1,4 +1,5 @@
-WITH product_enriched AS
+CREATE OR ALTER VIEW gold.dim_employees AS
+WITH employee_enriched AS
 (
 SELECT 
     employee_id,
@@ -42,4 +43,5 @@ SELECT
     annual_salary_usd,
     commission_rate_pct,
     hire_date
-FROM product_enriched ; 
+FROM employee_enriched ; 
+GO
