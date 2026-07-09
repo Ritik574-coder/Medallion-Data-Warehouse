@@ -1,4 +1,4 @@
-CREATE OR ALTER VIEW gold.dim_returns AS
+CREATE OR ALTER VIEW gold.dim_returns AS 
 SELECT 
     return_id,
     original_txn_id,
@@ -14,8 +14,6 @@ SELECT
     return_status,
     notes,
     restocked,
-    refund_amount,
-    quantity_returned,
     return_date
 FROM silver.returns ; 
-GO
+GO 
