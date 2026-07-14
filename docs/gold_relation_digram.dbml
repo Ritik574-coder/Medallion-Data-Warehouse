@@ -1,0 +1,92 @@
+
+Table gold.dim_customers {
+  customer_id int [pk]
+}
+
+Table gold.dim_employees {
+  employee_id int [pk]
+  manager_id int
+  store_id int
+}
+
+Table gold.dim_products {
+  product_id int [pk]
+}
+
+Table gold.dim_stores {
+  store_id int [pk]
+}
+
+Table gold.dim_inventory_snapshots {
+  inventory_snapshot_key bigint [pk]
+  store_id int
+}
+
+Table gold.dim_returns {
+  return_id int [pk]
+  customer_id int
+  product_id int
+  handled_by_emp_id int
+}
+
+Table gold.dim_reviews {
+  review_id int [pk]
+  customer_id int
+  product_id int
+}
+
+Table gold.dim_sales {
+  transaction_id int [pk]
+  order_id nvarchar
+  customer_id int
+  product_id int
+  store_id int
+  employee_id int
+}
+
+Table gold.fact_sales_transactions {
+  transaction_id int [pk]
+  product_id int
+  store_id int
+}
+
+Table gold.fact_returns {
+  return_id int [pk]
+}
+
+Table gold.fact_inventory_snapshots {
+  inventory_snapshot_key bigint [pk]
+  product_id int
+  store_id int
+}
+
+Ref: gold.dim_employees.store_id > gold.dim_stores.store_id
+
+Ref: gold.dim_returns.customer_id > gold.dim_customers.customer_id
+Ref: gold.dim_returns.product_id > gold.dim_products.product_id
+Ref: gold.dim_returns.handled_by_emp_id > gold.dim_employees.employee_id
+
+Ref: gold.dim_reviews.customer_id > gold.dim_customers.customer_id
+Ref: gold.dim_reviews.product_id > gold.dim_products.product_id
+
+Ref: gold.dim_sales.customer_id > gold.dim_customers.customer_id
+Ref: gold.dim_sales.product_id > gold.dim_products.product_id
+Ref: gold.dim_sales.store_id > gold.dim_stores.store_id
+Ref: gold.dim_sales.employee_id > gold.dim_employees.employee_id
+
+Ref: gold.fact_sales_transactions.product_id > gold.dim_products.product_id
+Ref: gold.fact_sales_transactions.store_id > gold.dim_stores.store_id
+
+Ref: gold.fact_returns.return_id > gold.dim_returns.return_id
+
+Ref: gold.fact_inventory_snapshots.store_id > gold.dim_stores.store_id
+
+Ref: gold.fact_inventory_snapshots.inventory_snapshot_key > gold.dim_inventory_snapshots.inventory_snapshot_key
+
+Ref: "gold"."fact_sales_transactions"."transaction_id" < "gold"."dim_sales"."transaction_id"
+
+Ref: "gold"."dim_employees"."manager_id" < "gold"."dim_employees"."employee_id"
+
+Ref: "gold"."dim_products"."product_id" < "gold"."fact_inventory_snapshots"."product_id"
+
+Ref: "gold"."dim_stores"."store_id" < "gold"."dim_inventory_snapshots"."store_id"
