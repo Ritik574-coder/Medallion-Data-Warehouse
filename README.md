@@ -43,6 +43,15 @@ These domains support analytics use cases such as sales performance, inventory v
 
 ![Entity Relationship Diagram](https://github.com/Ritik574-coder/Medallion-Data-Warehouse/blob/main/docs/Screencast%20from%202026-06-13%2010-24-36.gif)
 
+## 🧩 Gold Layer Entity Relationship Diagram (ERD)
+
+![Gold Entity Relationship Diagram](https://github.com/Ritik574-coder/Medallion-Data-Warehouse/blob/main/docs/gold_layer_relation_diagram.png)
+
+The Gold Layer follows a dimensional modeling approach and contains fact and dimension tables designed for analytics, reporting, and business intelligence use cases.
+
+📖 **Explore the complete interactive schema and relationships:**  
+[View Gold Layer Data Model](https://dbdocs.io/ritik74820/Medallion-Data-Warehouse)
+
 ## Architecture Assessment
 
 #### Strengths
