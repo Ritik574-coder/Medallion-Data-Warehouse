@@ -2,7 +2,7 @@
 
 A Microsoft SQL Server data warehouse project that implements the Medallion Architecture for retail analytics. The repository contains raw CSV source data, database initialization scripts, Bronze ingestion logic, and Silver transformation logic for customers, employees, inventory, products, returns, reviews, stores, and sales transactions.
 
-The project is designed as a practical data engineering portfolio project: it demonstrates raw data ingestion, schema design, full-refresh loading, data quality profiling, standardization rules, and curated analytical tables.
+This project is a practical data engineering portfolio project: it demonstrates raw data ingestion, schema design, full-refresh loading, data quality profiling, standardization rules, and curated analytical tables.
 
 ## Project Overview
 
@@ -19,7 +19,7 @@ The **Medallion-Data-Warehouse** project implements a modern data architecture f
 2. **Silver Layer**: Cleaned, standardized data with applied business rules, defensive parsing, and data quality enforcement
 3. **Gold Layer**: Business-ready analytics models and reporting dimensions (currently in development)
 
-The pipeline currently focuses on database setup, raw ingestion, and detailed Silver transformations and data modeling . It uses SQL Server scripts for DDL, stored procedures, data profiling, and transformation and business logic and more.....
+The pipeline currently focuses on database setup, raw ingestion, and detailed Silver transformations and data modeling. It uses SQL Server scripts for DDL, stored procedures, data profiling, transformation, business logic, and more.....
 
 ## Architecture
 
@@ -104,13 +104,13 @@ Medallion-Data-Warehouse/
 ├── docs/                                       # Project documentation assets
 |   ├──PROJECT_STRUCTURE.md                     # All info about this project 
 │   ├── data_architecture.png                   # Medallion architecture diagram
-│   ├── digram.png                              # Project walkthrough demo
-│   └── Screencast.gif                          # Data model / relationship diagram
+│   ├── diagram.png                              # Project walkthrough demo
+│   └── Screencast.gif                          # Data model/relationship diagram
 │                                               
 │
 ├── script/                                     # Core data warehouse implementation
 │   │
-│   ├── init_databse.sql                        # Database and schema initialization
+│   ├── init_database.sql                        # Database and schema initialization
 │   │
 │   ├── bronze/                                 # Bronze layer (raw ingestion)
 │   │   ├── ddl_bronze.sql                      # Bronze table definitions
@@ -209,7 +209,7 @@ The repository includes setup commands in:
 env_setup_command.sh
 ```
 
-Use it as a reference script for installing Docker, pulling the SQL Server image, creating a SQL Server container, and copying datasets into the container.
+Use it as a reference script to install Docker, pull the SQL Server image, create a SQL Server container, and copy datasets into the container.
 
 > Important: Treat credentials in setup scripts as local development placeholders. Replace them before using this project in any shared or production-like environment.
 
@@ -267,7 +267,7 @@ Use it as a reference script for installing Docker, pulling the SQL Server image
 ### Stores
 
 - Standardizes store names, store types, addresses, cities, states, countries, regions, and districts
-- Converts opened dates
+- Converts opening dates
 - Standardizes phone numbers
 - Validates square footage, employee count, rent, parking, cafe, and active status fields
 
@@ -294,7 +294,7 @@ Common data quality patterns used across the project:
 
 ## Roadmap
 
-My Planned to next improvements:
+My planned next improvements:
 
 - Add row count reconciliation between Bronze and Silver
 - Add data quality test queries for uniqueness, null checks, and accepted values
